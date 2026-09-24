@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sannet Solutions - Gestión de Inventario</title>
+    <style>
+        :root {
+            --azul-corp: #002D5A; 
+            --azul-acento: #007BFF;
+            --azul-suave: #e7f1ff;
+            --gris-fondo: #f4f7f9;
+            --gris-borde: #ced4da;
+            --gris-texto: #495057;
+            --blanco: #FFFFFF;
+            --rojo-delete: #c82333;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--gris-fondo); 
+            margin: 0; 
+            color: var(--gris-texto);
+        }
+
+        header { 
+            background: var(--azul-corp); 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+            border-bottom: 5px solid var(--azul-acento);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .container { width: 95%; max-width: 1300px; margin: 30px auto; }
+
+        .card {
+            background: var(--blanco);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border: 1px solid #e1e4e8;
+            position: relative; /* Necesario para posicionar el logo internamente */
+        }
+
+        /* Estilo para el logo dentro de la card */
+        .card-logo {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            max-height: 45px;
+            width: auto;
+        }
+
+        h2 { color: var(--azul-corp); margin-top: 0; border-left: 5px solid var(--azul-acento); padding-left: 15px; }
+
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .grid-form-modal {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        .field-group { display: flex; flex-direction: column; }
+        
+        label { 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            margin-bottom: 5px; 
+            color: var(--azul-corp);
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 1px solid var(--gris-borde);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--azul-acento);
+            box-shadow: 0 0 0 3px var(--azul-suave);
+        }
+
+        /* Tabla */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { 
+            background: var(--azul-corp); 
+            color: white; 
+            padding: 15px; 
+            font-size: 0.85rem; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; text-align: center; font-size: 0.9rem; }
+        tr:hover { background-color: #f8fbff; }
+
+        /* Botones */
+        .btn { 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn-primary { background: var(--azul-acento); color: white; }
+        .btn-primary:hover { background: #0069d9; transform: translateY(-1px); }
+        
+        .btn-save { background: var(--azul-corp); color: white; }
+        .btn-save:hover { background: #001a35; transform: translateY(-1px); }
+
+        .btn-outline { background: transparent; border: 1px solid var(--azul-acento); color: var(--azul-acento); }
+        .btn-outline:hover { background: var(--azul-suave); }
+
+        .btn-danger { background: var(--rojo-delete); color: white; }
+
+        /* Modales */
+        .modal { 
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0, 45, 90, 0.6); backdrop-filter: blur(3px);
+        }
+        .modal-content { 
+            background: white; margin: 2% auto; width: 90%; max-width: 800px; 
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-header { 
+            background: var(--azul-corp); color: white; padding: 15px 25px; 
+            position: sticky; top: 0; z-index: 10;
+        }
+        .modal-body { padding: 25px; }
+
+        .modal-footer-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            padding-bottom: 10px;
+        }
+        .modal-footer-btns .btn {
+            min-width: 180px; 
+            flex: 0 1 auto;
+        }
+
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
+        .toast { 
+            background: var(--azul-corp); color: white; padding: 15px 25px; 
+            border-radius: 8px; margin-top: 10px; border-left: 6px solid var(--azul-acento);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideIn 0.4s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 40px;">
+    <div style="flex: 1;"></div>
+    <h1 style="margin:0; font-size: 1.5rem; flex: 2;">SISTEMA DE GESTIÓN DE INVENTARIO</h1>
+    <div style="flex: 1; text-align: right;">
+        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; font-weight: bold; background: #c82333; padding: 8px 15px; border-radius: 5px; font-size: 0.8rem;">CERRAR SESIÓN</a>
+    </div>
+</header>
+
+<div id="toast-container"></div>
+
+<div class="container">
+    <div class="card">
+        <img src="{{ url_for('static', filename='img/logo_sannet.png') }}" alt="Logo" class="card-logo">
+        
+        <h2>Registrar en el Inventario</h2>
+        <form id="formAgregar">
+            <div class="grid-form">
+                <div class="field-group">
+                    <label>Numero de Partes</label>
+                    <input type="text" name="nombre" minlength="3" maxlength="100" placeholder="Parte" required>
+                </div>
+                <div class="field-group">
+                    <label>Fabricante</label>
+                    <input type="text" name="marca" minlength="2" maxlength="50" placeholder="Fabricante" required>
+                </div>
+                <div class="field-group">
+                    <label>Serial</label>
+                    <input type="text" name="serial" minlength="5" maxlength="50" placeholder="Serial único" required>
+                </div>
+                <div class="field-group">
+                    <label>Categoría</label>
+                    <select name="categoria_id" required>
+                        <option value="">Seleccione...</option>
+                        {% for c in categorias %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label>Depósito</label>
+                    <select name="deposito_id" required>
+                        <option value="">Seleccione...</option>
+                        {% for d in depositos %}<option value="{{ d.id }}">{{ d.nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Precio ($)</label>
+                    <input type="text" name="precio_usd" maxlength="10" placeholder="0.00" onkeypress="return onlyNumbers(event, true)">
+                </div>
+                <div class="field-group">
+                    <label>Precio (Bs)</label>
+                    <input type="text" name="precio_bs" maxlength="15" placeholder="0.00" onkeypress="return onlyNumbers(event, true)">
+                </div>
+                <div class="field-group">
+                    <label>Stock Inicial</label>
+                    <input type="text" name="stock" maxlength="6" placeholder="0" onkeypress="return onlyNumbers(event, false)">
+                </div>
+
+                <div class="field-group full-width">
+                    <label>Especificaciones</label>
+                    <textarea name="especificaciones" rows="2" maxlength="500"></textarea>
+                </div>
+
+                <div class="full-width" style="text-align:center; margin-top: 10px;">
+                    <button type="submit" class="btn btn-save" style="padding: 12px 60px;">GUARDAR EN BASE DE DATOS</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2>Inventario</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="busqueda" placeholder="Buscar..." onkeyup="filtrar()" style="width: 200px;">
+                <select id="fCat" onchange="filtrar()"><option value="">Categorías</option>{% for c in categorias %}<option>{{c.nombre}}</option>{% endfor %}</select>
+                <select id="fDep" onchange="filtrar()"><option value="">Depósitos</option>{% for d in depositos %}<option>{{d.nombre}}</option>{% endfor %}</select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cat / Ubicación</th>
+                        <th>Parte / Fabricante</th>
+                        <th>Serial</th>
+                        <th>Precio (Ref)</th>
+                        <th>Stock</th>
+                        <th>Ajuste Rápido</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaBody">
+                    {% for p in productos %}
+                    <tr id="fila_{{ p.id }}">
+                        <td>
+                            <span class="c-v" style="font-weight: 600; color: var(--azul-acento);">{{p.categoria_nombre}}</span><br>
+                            <small class="d-v">📍 {{p.deposito_nombre}}</small>
+                        </td>
+                        <td style="text-align: left;">
+                            <b class="n-v">{{p.nombre}}</b> - <span class="m-v">{{p.marca}}</span><br>
+                            <small class="e-v" style="color: #888;">{{p.especificaciones}}</small>
+                        </td>
+                        <td class="s-v"><code>{{p.serial}}</code></td>
+                        <td class="p-v">
+                            <strong>${{p.precio_usd}}</strong><br>
+                            <small>Bs. {{p.precio_bs}}</small>
+                        </td>
+                        <td id="stk_{{p.id}}" style="font-size: 1.1rem; font-weight: bold; color: var(--azul-corp);">{{p.stock}}</td>
+                        <td>
+                            <div style="display:flex; justify-content: center; gap:5px;">
+                                <input type="text" id="q_{{p.id}}" value="1" style="width:35px; text-align:center; padding: 5px;" onkeypress="return onlyNumbers(event, false)">
+                                <button class="btn btn-outline" onclick="stk({{p.id}}, 'sumar')" style="padding: 2px 8px;">+</button>
+                                <button class="btn btn-outline" onclick="stk({{p.id}}, 'restar')" style="padding: 2px 8px;">-</button>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline" onclick="abrirEdicion(this)" 
+                                data-id="{{p.id}}" data-nombre="{{p.nombre}}" data-marca="{{p.marca}}" 
+                                data-serial="{{p.serial}}" data-cat="{{p.categoria_id}}" data-dep="{{p.deposito_id}}" 
+                                data-usd="{{p.precio_usd}}" data-bs="{{p.precio_bs}}" data-stock="{{p.stock}}" 
+                                data-esp="{{p.especificaciones}}">⚙️</button>
+                            <button class="btn btn-danger" onclick="abrirEliminar({{p.id}}, '{{p.nombre}}')">✕</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalEditar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>Modificar Registro de Hardware</h3></div>
+        <form id="formEdit" class="modal-body">
+            <div class="grid-form-modal">
+                <div class="field-group"><label>Nombre</label><input type="text" id="e_n" name="nombre" minlength="3" maxlength="100" required></div>
+                <div class="field-group"><label>Marca</label><input type="text" id="e_m" name="marca" maxlength="50"></div>
+                <div class="field-group"><label>Serial</label><input type="text" id="e_s" name="serial" maxlength="50" required></div>
+                <div class="field-group"><label>Categoría</label>
+                    <select id="e_c" name="categoria_id">{% for c in categorias %}<option value="{{c.id}}">{{c.nombre}}</option>{% endfor %}</select>
+                </div>
+                <div class="field-group"><label>Depósito</label>
+                    <select id="e_d" name="deposito_id">{% for d in depositos %}<option value="{{d.id}}">{{d.nombre}}</option>{% endfor %}</select>
+                </div>
+                <div class="field-group"><label>Stock</label><input type="text" id="e_st" name="stock" maxlength="6" onkeypress="return onlyNumbers(event, false)"></div>
+                <div class="field-group"><label>Precio $</label><input type="text" id="e_u" name="precio_usd" maxlength="10" onkeypress="return onlyNumbers(event, true)"></div>
+                <div class="field-group"><label>Precio Bs.</label><input type="text" id="e_b" name="precio_bs" maxlength="15" onkeypress="return onlyNumbers(event, true)"></div>
+                
+                <div class="field-group full-width"><label>Especificaciones</label><textarea id="e_e" name="especificaciones" rows="3" maxlength="500"></textarea></div>
+                
+                <div class="full-width modal-footer-btns">
+                    <button type="submit" class="btn btn-save">Actualizar Cambios</button>
+                    <button type="button" class="btn btn-outline" onclick="cerrar()">Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalEliminar" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header" style="background: #343a40;"><h3>Confirmación</h3></div>
+        <div class="modal-body">
+            <p>¿Está seguro de eliminar este producto?</p>
+            <p><strong id="del_nombre" style="color: var(--azul-corp); font-size: 1.1rem;"></strong></p>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button id="btnConfEliminar" class="btn btn-danger" style="flex: 1;">Eliminar</button>
+                <button class="btn btn-outline" style="flex: 1;" onclick="cerrar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let idParaEliminar = null;
+
+function msg(t, type='success') {
+    const toast = document.getElementById('toast-container');
+    const div = document.createElement('div');
+    div.className = 'toast';
+    div.innerText = t;
+    if(type === 'error') div.style.borderLeftColor = 'var(--rojo-delete)';
+    toast.appendChild(div);
+    setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 500); }, 3000);
+}
+
+function onlyNumbers(evt, allowDot) {
+    const charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (allowDot && charCode === 46) {
+        if (evt.target.value.includes('.')) return false;
+        return true;
+    }
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
+    return true;
+}
+
+document.getElementById('formAgregar').onsubmit = function(e) {
+    e.preventDefault();
+    fetch('/agregar', { method: 'POST', body: new FormData(this) })
+    .then(r => r.json()).then(data => {
+        if(data.success) { 
+            msg("✅ Guardado correctamente"); 
+            setTimeout(() => location.reload(), 1000); 
+        } else {
+            msg("❌ Error: " + data.error, 'error');
+        }
+    });
+};
+
+function abrirEdicion(b) {
+    const f = document.getElementById('formEdit');
+    f.setAttribute('data-id', b.dataset.id);
+    document.getElementById('e_n').value = b.dataset.nombre;
+    document.getElementById('e_m').value = b.dataset.marca;
+    document.getElementById('e_s').value = b.dataset.serial;
+    document.getElementById('e_c').value = b.dataset.cat;
+    document.getElementById('e_d').value = b.dataset.dep;
+    document.getElementById('e_u').value = b.dataset.usd;
+    document.getElementById('e_b').value = b.dataset.bs;
+    document.getElementById('e_st').value = b.dataset.stock;
+    document.getElementById('e_e').value = b.dataset.esp;
+    document.getElementById('modalEditar').style.display = 'block';
+}
+
+document.getElementById('formEdit').onsubmit = function(e) {
+    e.preventDefault();
+    const id = this.dataset.id;
+    fetch('/editar/'+id, { method: 'POST', body: new FormData(this) })
+    .then(r => r.json()).then(data => {
+        if(data.success) {
+            msg("💾 Cambios aplicados");
+            setTimeout(() => location.reload(), 800);
+        }
+    });
+};
+
+function abrirEliminar(id, nombre) {
+    idParaEliminar = id;
+    document.getElementById('del_nombre').innerText = nombre;
+    document.getElementById('modalEliminar').style.display = 'block';
+}
+
+document.getElementById('btnConfEliminar').onclick = function() {
+    fetch('/eliminar/'+idParaEliminar, { method: 'POST' })
+    .then(r => r.json()).then(data => {
+        if(data.success) {
+            document.getElementById('fila_'+idParaEliminar).remove();
+            msg("🗑️ Registro eliminado");
+            cerrar();
+        }
+    });
+};
+
+function stk(id, op) {
+    const qInput = document.getElementById('q_'+id);
+    const qValue = qInput.value || 1;
+    const fd = new FormData(); 
+    fd.append('cantidad', qValue);
+
+    fetch(`/modificar_stock_ajax/${id}/${op}`, { method: 'POST', body: fd })
+    .then(r => r.json()).then(data => {
+        if(data.success) {
+            document.getElementById('stk_'+id).innerText = data.nuevo_stock;
+            msg(`📦 Stock: ${data.nuevo_stock}`);
+        }
+    });
+}
+
+function filtrar() {
+    let b = document.getElementById("busqueda").value.toUpperCase();
+    let c = document.getElementById("fCat").value.toUpperCase();
+    let d = document.getElementById("fDep").value.toUpperCase();
+    let rows = document.getElementById("tablaBody").rows;
+    for(let r of rows) {
+        let t = r.innerText.toUpperCase();
+        r.style.display = (t.includes(b) && t.includes(c) && t.includes(d)) ? "" : "none";
+    }
+}
+
+function cerrar() { 
+    document.getElementById('modalEditar').style.display = 'none'; 
+    document.getElementById('modalEliminar').style.display = 'none'; 
+}
+
+window.onclick = function(event) {
+    if (event.target.className === 'modal') cerrar();
+}
+</script>
+</body>
+</html>

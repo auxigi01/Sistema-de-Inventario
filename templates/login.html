@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sannet - Sistema de Inventario</title>
+    <style>
+        :root {
+            --azul-corp: #002D5A;
+            --azul-acento: #007BFF;
+            --azul-soft: #eef4fb;
+            --gris-fondo: #f0f2f5;
+            --blanco: #ffffff;
+            --error-red: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--gris-fondo);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle at 20% 20%, rgba(0, 123, 255, 0.05) 0%, transparent 40%);
+        }
+
+        .login-card {
+            background: var(--blanco);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 45, 90, 0.1);
+            width: 100%;
+            max-width: 400px;
+            border-top: 5px solid var(--azul-corp);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        h2 {
+            color: var(--azul-corp);
+            font-size: 1.4rem;
+            margin: 0;
+            font-weight: 700;
+            text-align: left;
+            line-height: 1.2;
+        }
+
+        .logo-mini {
+            max-width: 200px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--azul-corp);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #d1d9e0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--azul-acento);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        /* Estilos para el botón del ojo */
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #adb5bd;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--azul-acento);
+            background: none;
+        }
+
+        .toggle-password svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: var(--azul-corp);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background: var(--azul-acento);
+        }
+
+        .error-box {
+            background-color: #fff0f0;
+            color: var(--error-red);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--error-red);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="header-container">
+            <h2>Sistema de<br>Inventario</h2>
+            <img src="{{ url_for('static', filename='img/sannert_solutions_logo2.png') }}" alt="Logo" class="logo-mini">
+        </div>
+
+        {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" id="loginForm">
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" 
+                       name="usuario" 
+                       required 
+                       minlength="3" 
+                       maxlength="20"
+                       placeholder="Ingrese su usuario">
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" 
+                           id="password"
+                           name="password" 
+                           required 
+                           minlength="4" 
+                           maxlength="16"
+                           placeholder="••••••••">
+                    <button type="button" class="toggle-password" id="toggleBtn">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit">INGRESAR</button>
+        </form>
+    </div>
+
+    <script>
+        // Lógica para mostrar/ocultar contraseña
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        // SVG del ojo tachado (para cuando se ve la contraseña)
+        const eyeOffPath = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />`;
+        // SVG del ojo normal
+        const eyePath = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+
+        toggleBtn.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Cambiar el icono visualmente
+            eyeIcon.innerHTML = type === 'password' ? eyePath : eyeOffPath;
+        });
+
+        // Restricción para campos solo numéricos (según tu preferencia guardada)
+        document.querySelectorAll('.only-numbers').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
+</body>
+</html>
